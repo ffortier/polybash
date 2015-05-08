@@ -1,4 +1,6 @@
 #!/bin/bash
+# http://jsfiddle.net/d6218zy6/
+# http://en.wikipedia.org/wiki/Even%E2%80%93odd_rule
 
 polygon=
 test_point=
@@ -15,9 +17,6 @@ main() {
 
     [[ $c -eq 0 ]] && echo 'In'
     [[ $c -eq 0 ]] || echo 'Out'
-
-    log_debug 'http://jsfiddle.net/d6218zy6/'
-    log_debug 'http://en.wikipedia.org/wiki/Even%E2%80%93odd_rule'
 }
 
 is_point_in_path() {
@@ -49,13 +48,8 @@ is_point_in_path() {
         h_point_x=${h_point%,*}
         h_point_y=${h_point#*,}
 
-        [[ $l_point_y -gt $y ]]
-        
-        l_point_y_gt=$?
-        
-        [[ $h_point_y -gt $y ]]
-
-        h_point_y_gt=$?
+        [[ $l_point_y -gt $y ]]; l_point_y_gt=$?
+        [[ $h_point_y -gt $y ]]; h_point_y_gt=$?
 
         log_debug "l_point=$l_point l_point_x=$l_point_x l_point_y=$l_point_y l_point_y_gt=$l_point_y_gt"
         log_debug "h_point=$h_point h_point_x=$h_point_x h_point_y=$h_point_y h_point_y_gt=$h_point_y_gt "
@@ -69,8 +63,7 @@ is_point_in_path() {
             log_debug "delta_x=$delta_x delta_y=$delta_y diff_y=$diff_y result=$result"
 
             if [[ $x -lt $result ]]; then
-                ! [[ c -eq 0 ]]
-                c=$?
+                ! [[ c -eq 0 ]]; c=$?
                 log_debug "c=$c"
             fi
         fi
@@ -113,6 +106,7 @@ while getopts p:t:c:l: opt; do
             ;;
         l)
             log_level=$OPTARG
+            ;;
     esac
 done
 
