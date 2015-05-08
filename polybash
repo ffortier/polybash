@@ -3,6 +3,7 @@
 polygon=
 test_point=
 color=
+log_level=1
 
 main() {
     log_debug "polygon=$polygon"
@@ -84,10 +85,22 @@ is_point_in_path() {
 }
 
 log_debug() {
-    echo -e "${debug_color}DEBUG $@${no_color}" 1>&3
+    [[ $log_level -ge 4 ]] && echo -e "${debug_color}DEBUG $@${no_color}" 1>&3
 }
 
-while getopts p:t:c: opt; do
+log_info() {
+    [[ $log_level -ge 3 ]] && echo -e "${info_color}DEBUG $@${no_color}" 1>&3
+}
+
+log_warn() {
+    [[ $log_level -ge 2 ]] && echo -e "${warn_color}DEBUG $@${no_color}" 1>&3
+}
+
+log_error() {
+    [[ $log_level -ge 1 ]] && echo -e "${error_color}DEBUG $@${no_color}" 1>&3
+}
+
+while getopts p:t:c:l: opt; do
     case $opt in
         p)
             polygon=$OPTARG
@@ -98,13 +111,18 @@ while getopts p:t:c: opt; do
         c)  
             color=$OPTARG
             ;;
+        l)
+            log_level=$OPTARG
     esac
 done
 
 shift $((OPTIND - 1))
 
 if [[ $color == 'yes' ]]; then
-    debug_color='\033[1;33m'
+    info_color='\033[1;34m'
+    debug_color='\033[1;32m'
+    warn_color='\033[1;33m'
+    error_color='\033[0;31m'
     no_color='\033[0m'
 fi
 
