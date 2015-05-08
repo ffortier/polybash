@@ -1,0 +1,111 @@
+#!/bin/bash
+
+polygon=
+test_point=
+color=
+
+main() {
+    log_debug "polygon=$polygon"
+    log_debug "test_point=$test_point"
+    
+    is_point_in_path ${test_point%,*} ${test_point#*,} "$polygon"
+
+    local c=$?
+
+    [[ $c -eq 0 ]] && echo 'In'
+    [[ $c -eq 0 ]] || echo 'Out'
+
+    log_debug 'http://jsfiddle.net/d6218zy6/'
+    log_debug 'http://en.wikipedia.org/wiki/Even%E2%80%93odd_rule'
+}
+
+is_point_in_path() {
+    local x=$1
+    local y=$2
+    local poly=($3)
+    local num=${#poly[@]}
+    local i=0
+    local j=$((num - 1))
+    local c=1
+    local l_point=
+    local l_point_x=
+    local l_point_y=
+    local l_point_gt=
+    local h_point=
+    local h_point_x=
+    local h_point_y=
+    local h_point_gt=
+    local delta_x=
+    local delta_y=
+    local diff_y=
+    local result=
+
+    while [[ $i -lt ${#poly[@]} ]]; do
+        l_point=${poly[i]}
+        l_point_x=${l_point%,*}
+        l_point_y=${l_point#*,}
+        h_point=${poly[j]}
+        h_point_x=${h_point%,*}
+        h_point_y=${h_point#*,}
+
+        [[ $l_point_y -gt $y ]]
+        
+        l_point_y_gt=$?
+        
+        [[ $h_point_y -gt $y ]]
+
+        h_point_y_gt=$?
+
+        log_debug "l_point=$l_point l_point_x=$l_point_x l_point_y=$l_point_y l_point_y_gt=$l_point_y_gt"
+        log_debug "h_point=$h_point h_point_x=$h_point_x h_point_y=$h_point_y h_point_y_gt=$h_point_y_gt "
+
+        if [[ $l_point_y_gt -ne $h_point_y_gt ]]; then
+            delta_x=$((h_point_x - l_point_x))
+            delta_y=$((h_point_y - l_point_y))
+            diff_y=$((y - l_point_y))
+            result=$((delta_x * diff_y / delta_y + l_point_x))
+
+            log_debug "delta_x=$delta_x delta_y=$delta_y diff_y=$diff_y result=$result"
+
+            if [[ $x -lt $result ]]; then
+                ! [[ c -eq 0 ]]
+                c=$?
+                log_debug "c=$c"
+            fi
+        fi
+
+        j=$i
+        i=$((i + 1))
+    done
+
+    log_debug "c=$c"
+
+    return $c
+}
+
+log_debug() {
+    echo -e "${debug_color}DEBUG $@${no_color}" 1>&3
+}
+
+while getopts p:t:c: opt; do
+    case $opt in
+        p)
+            polygon=$OPTARG
+            ;;
+        t)
+            test_point=$OPTARG
+            ;;
+        c)  
+            color=$OPTARG
+            ;;
+    esac
+done
+
+shift $((OPTIND - 1))
+
+if [[ $color == 'yes' ]]; then
+    debug_color='\033[1;33m'
+    no_color='\033[0m'
+fi
+
+${1:-main} $@ 3>&2
