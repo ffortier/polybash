@@ -4,14 +4,14 @@ Calculates if a point is in a polygon in bash!
 
 ## Usage
 
-Without debug logs
-
 ```bash
-./polybash -p "60,20 100,40 100,80 60,100 20,80 20,40" -t 61,21 -c yes 2> /dev/null
+./polybash -p "60,20 100,40 100,80 60,100 20,80 20,40" -t 61,21 -c yes -l 4 
 ```
 
-With debug logs
+## Log levels
 
-```bash
-./polybash -p "60,20 100,40 100,80 60,100 20,80 20,40" -t 61,21 -c yes 
-```
+0) No
+1) Error (default)
+2) Warn
+3) Info
+4) Debug
