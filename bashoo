@@ -1,0 +1,22 @@
+#!/bin/bash
+
+bashoo_inc=0
+
+new() {
+    bashoo_inc=$((bashoo_inc + 1))
+
+    local args=`get_replacements $1 $bashoo_inc`
+    local tmp=`mktemp -t $1`
+    
+    eval "sed $args $1" > $tmp
+    source $tmp
+    rm $tmp
+
+    return $bashoo_inc
+}
+
+get_replacements() {
+    grep '^\([a-zA-Z0-9_]*=\|[a-zA-Z0-9_]*(\)' $1 | sed 's/^\(.*\)[(=].*/\1/' | while read line; do
+        echo -n "-e 's/$line/$line$2/g' "
+    done;
+}

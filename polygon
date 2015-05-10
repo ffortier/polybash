@@ -1,0 +1,82 @@
+#!/bin/bash
+
+data=
+
+polygon_init() {
+    data=($1)
+}
+
+polygon_enumerate_edges() {
+    local prev=`polygon_get_last`
+    local item=
+    local x1=
+    local y1=
+    local x2=
+    local y2=
+
+    for item in ${data[@]}; do
+        x1=${prev%,*}
+        y1=${prev#*,}
+        x2=${item%,*}
+        y2=${item#*,}
+
+        if [[ $y1 -eq $y2 ]]; then
+            coefficient="ZERO"
+            origin=$y1
+        elif [[ $x1 -eq $x2 ]]; then
+            coefficient="INFINITY"
+            origin=0
+        else
+            coefficient=`bc -l <<< "($y2 - $y1) / ($x2 - $x1)"`
+            origin=`bc -l <<< "$y1 - $coefficient * $x1"`
+        fi
+
+        log_debug "x1=$x1 y1=$y1 x2=$x2 y2=$y2 coefficient=$coefficient origin=$origin"
+
+        echo "$x1 $y1 $x2 $y2 $coefficient $origin"
+
+        prev=$item
+    done;
+}
+
+polygon_get_last() {
+    local len=${#data[@]}
+    local last_index=$((len - 1))
+
+    echo "${data[$last_index]}"
+}
+
+polygon_find_match() {
+    while read edge; do
+        $1 | polygon_are_crossing "$edge"
+
+        [[ $? -eq 0 ]] && return 0
+    done
+
+    return 1
+}
+
+polygon_are_crossing() {
+    while read edge; do
+        polygon_is_crossing "$1" "$edge"
+
+        [[ $? -eq 0 ]] && return 0
+    done
+
+    return 1
+}
+
+polygon_is_crossing() {
+    local edge1=($1)
+    local edge2=($2)
+
+    log_debug "coefficient ${edge1[4]} ${edge2[4]}"
+
+    if [[ ${edge1[4]} -eq ${edge2[4]} ]]; then
+        log_debug "same coefficient"
+    else
+        log_debug "not same"
+    fi
+
+    return 1
+}
